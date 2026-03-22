@@ -33,6 +33,7 @@ struct MeetingDetailView: View {
             case .transcript: transcriptView
             case .summary: summaryView
             case .sentiment: sentimentView
+            case .notes: notesView
             case .info: infoView
             }
         }
@@ -48,6 +49,7 @@ struct MeetingDetailView: View {
         .onChange(of: meeting.transcriptPath) { loadData() }
         .onChange(of: meeting.summaryPath) { loadData() }
         .onChange(of: meeting.sentimentPath) { loadData() }
+        .onChange(of: meeting.notesPath) { loadData() }
         .onChange(of: meeting.status) { loadData() }
     }
 
@@ -110,6 +112,12 @@ struct MeetingDetailView: View {
                     if transcript != nil {
                         Button("Export Transcript (.txt)") { exportTranscript() }
                         Button("Copy Transcript") { copyTranscript() }
+                    }
+                    if !notesText.isEmpty {
+                        Button("Copy Notes") {
+                            NSPasteboard.general.clearContents()
+                            NSPasteboard.general.setString(notesText, forType: .string)
+                        }
                     }
                     Divider()
                     Button("Delete Meeting", role: .destructive) { appState.deleteMeeting(meeting) }
@@ -406,6 +414,63 @@ struct MeetingDetailView: View {
         }
     }
 
+    // MARK: - Notes View
+
+    private var notesView: some View {
+        VStack(spacing: 0) {
+            // Toolbar
+            HStack {
+                Text("Meeting Notes")
+                    .font(.subheadline.weight(.medium))
+                    .foregroundStyle(.secondary)
+                Spacer()
+                if notesUnsaved {
+                    Text("Unsaved")
+                        .font(.caption2)
+                        .foregroundStyle(.orange)
+                }
+                Button(action: saveNotes) {
+                    Label("Save", systemImage: "square.and.arrow.down")
+                }
+                .controlSize(.small)
+                .buttonStyle(.borderedProminent)
+                .keyboardShortcut("s", modifiers: .command)
+            }
+            .padding(.horizontal, 20)
+            .padding(.vertical, 10)
+
+            Divider()
+
+            // Text editor
+            TextEditor(text: $notesText)
+                .font(.callout)
+                .lineSpacing(5)
+                .scrollContentBackground(.hidden)
+                .padding(.horizontal, 16)
+                .padding(.vertical, 10)
+                .onChange(of: notesText) {
+                    notesUnsaved = true
+                    scheduleAutoSave()
+                }
+        }
+    }
+
+    private func saveNotes() {
+        notesSaveTimer?.invalidate()
+        notesSaveTimer = nil
+        appState.saveNotes(meeting: meeting, notes: notesText)
+        notesUnsaved = false
+    }
+
+    private func scheduleAutoSave() {
+        notesSaveTimer?.invalidate()
+        notesSaveTimer = Timer.scheduledTimer(withTimeInterval: 3.0, repeats: false) { _ in
+            Task { @MainActor in
+                saveNotes()
+            }
+        }
+    }
+
     // MARK: - Info View
 
     private var infoView: some View {
@@ -454,6 +519,11 @@ struct MeetingDetailView: View {
         if let path = meeting.sentimentPath {
             sentiment = appState.storageService.loadSentiment(from: path)
         } else { sentiment = nil }
+
+        if let path = meeting.notesPath {
+            notesText = appState.storageService.loadNotes(from: path) ?? ""
+        } else { notesText = "" }
+        notesUnsaved = false
     }
 
     private let speakerColors: [Color] = [.blue, .orange, .green, .purple, .pink, .cyan, .brown, .mint]
