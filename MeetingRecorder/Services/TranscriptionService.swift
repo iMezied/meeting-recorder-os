@@ -26,16 +26,13 @@ final class TranscriptionService {
         print("[Transcription] Model: \(modelPath)")
         print("[Transcription] Language: \(language)")
 
-        var arguments = [
+        let arguments = [
             "--model", modelPath,
             "--file", audioPath,
             "--output-json-full",
             "--print-progress",
+            "--language", language,
         ]
-
-        if language != "auto" {
-            arguments += ["--language", language]
-        }
 
         let (stdout, _) = try await runProcess(
             executable: whisperPath,
