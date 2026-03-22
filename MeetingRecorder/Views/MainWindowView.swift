@@ -26,7 +26,8 @@ struct MainWindowView: View {
                             .frame(width: 7, height: 7)
                         Text(appState.meetingDetector.isMonitoring ? "Monitoring" : "Auto-detect off")
                             .font(.caption)
-                            .foregroundStyle(appState.meetingDetector.isMonitoring ? .secondary : .secondary.opacity(0.6))
+                            .foregroundStyle(.secondary)
+                            .opacity(appState.meetingDetector.isMonitoring ? 1.0 : 0.6)
                     }
                     .padding(.horizontal, 8)
                     .padding(.vertical, 4)

@@ -28,7 +28,7 @@ struct MeetingRecorderApp: App {
 }
 
 // MARK: - AppDelegate manages the library window via NSWindow
-
+@MainActor
 class AppDelegate: NSObject, NSApplicationDelegate {
     private var libraryWindow: NSWindow?
 
