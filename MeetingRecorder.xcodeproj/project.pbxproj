@@ -1,0 +1,398 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		0D922445948060BBF19A0B16 /* MainWindowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00231144F425F2CA0B756E0 /* MainWindowView.swift */; };
+		1892ECA23D0C29DFD2137832 /* MenuBarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 321E7D150243EAC143D1131C /* MenuBarView.swift */; };
+		1DBE1659C07FBE48F956BF2E /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 943657212B7726FDBF0BA8EE /* SettingsView.swift */; };
+		5847C72B63E20035DD2F6E19 /* TranscriptionService.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5EF5A54C136850D736929DD /* TranscriptionService.swift */; };
+		697AE6CA01C44898FDAFF44C /* StorageService.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA8343DE953D617BA53C8BD6 /* StorageService.swift */; };
+		6DC072205E793F017D639AD0 /* AudioRecordingService.swift in Sources */ = {isa = PBXBuildFile; fileRef = E64E0A49DF24109418378E1E /* AudioRecordingService.swift */; };
+		75F2EF869436BB03E03AE1F4 /* MeetingRecorderApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2D42CF914F5DE82DFF54A34E /* MeetingRecorderApp.swift */; };
+		7D314BFFB6E5AE13DE8682CB /* MeetingDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3A316A66C8736A9560EB30B /* MeetingDetailView.swift */; };
+		7F3954410637896A2F763C31 /* NotificationHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5E77C168AE9068B49FE50F9 /* NotificationHelper.swift */; };
+		84547E2E51C52AB51B5B09AE /* MeetingDetectorService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 654EF10AF83A4F156C18AE99 /* MeetingDetectorService.swift */; };
+		8787746C49E21941D3915CF3 /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77D51CA3B07687B28AB9E11B /* Models.swift */; };
+		F50B3FBF4DEE6981C82050AD /* AppState.swift in Sources */ = {isa = PBXBuildFile; fileRef = D27FFA85EB846C8708EC3CFE /* AppState.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		1CE0B053F636C8564079FA27 /* MeetingRecorder.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = MeetingRecorder.entitlements; sourceTree = "<group>"; };
+		2D42CF914F5DE82DFF54A34E /* MeetingRecorderApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MeetingRecorderApp.swift; sourceTree = "<group>"; };
+		321E7D150243EAC143D1131C /* MenuBarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuBarView.swift; sourceTree = "<group>"; };
+		654EF10AF83A4F156C18AE99 /* MeetingDetectorService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MeetingDetectorService.swift; sourceTree = "<group>"; };
+		77D51CA3B07687B28AB9E11B /* Models.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Models.swift; sourceTree = "<group>"; };
+		943657212B7726FDBF0BA8EE /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		A00231144F425F2CA0B756E0 /* MainWindowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainWindowView.swift; sourceTree = "<group>"; };
+		A5E77C168AE9068B49FE50F9 /* NotificationHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationHelper.swift; sourceTree = "<group>"; };
+		CC5A5E7D89DE1ADF1AF506A9 /* Meeting Recorder.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Meeting Recorder.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		D27FFA85EB846C8708EC3CFE /* AppState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppState.swift; sourceTree = "<group>"; };
+		D3A316A66C8736A9560EB30B /* MeetingDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MeetingDetailView.swift; sourceTree = "<group>"; };
+		E5EF5A54C136850D736929DD /* TranscriptionService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TranscriptionService.swift; sourceTree = "<group>"; };
+		E64E0A49DF24109418378E1E /* AudioRecordingService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioRecordingService.swift; sourceTree = "<group>"; };
+		EA8343DE953D617BA53C8BD6 /* StorageService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StorageService.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXGroup section */
+		4256E1297D09C85C398306F8 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				CC5A5E7D89DE1ADF1AF506A9 /* Meeting Recorder.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		9B65A4B311FA5EDCDFF96876 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				1CE0B053F636C8564079FA27 /* MeetingRecorder.entitlements */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
+		9F2D3DAEED6F076EFAC5B7BD /* App */ = {
+			isa = PBXGroup;
+			children = (
+				D27FFA85EB846C8708EC3CFE /* AppState.swift */,
+				2D42CF914F5DE82DFF54A34E /* MeetingRecorderApp.swift */,
+			);
+			path = App;
+			sourceTree = "<group>";
+		};
+		A874356956A680A4D8182C8A /* Utilities */ = {
+			isa = PBXGroup;
+			children = (
+				A5E77C168AE9068B49FE50F9 /* NotificationHelper.swift */,
+			);
+			path = Utilities;
+			sourceTree = "<group>";
+		};
+		CD807A034CEFA844814AC7FA /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				77D51CA3B07687B28AB9E11B /* Models.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		D58683CFD574658150FC55C5 /* MeetingRecorder */ = {
+			isa = PBXGroup;
+			children = (
+				9F2D3DAEED6F076EFAC5B7BD /* App */,
+				CD807A034CEFA844814AC7FA /* Models */,
+				9B65A4B311FA5EDCDFF96876 /* Resources */,
+				FDBCD29659553EDC96568A8A /* Services */,
+				A874356956A680A4D8182C8A /* Utilities */,
+				EFFCB2D92B63BDC74B5445D3 /* ViewModels */,
+				E4A669717340A3D4FF375E1F /* Views */,
+			);
+			path = MeetingRecorder;
+			sourceTree = "<group>";
+		};
+		E4A669717340A3D4FF375E1F /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				A00231144F425F2CA0B756E0 /* MainWindowView.swift */,
+				D3A316A66C8736A9560EB30B /* MeetingDetailView.swift */,
+				321E7D150243EAC143D1131C /* MenuBarView.swift */,
+				943657212B7726FDBF0BA8EE /* SettingsView.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		EFFCB2D92B63BDC74B5445D3 /* ViewModels */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = ViewModels;
+			sourceTree = "<group>";
+		};
+		FBECA5B86895E43DAE3A93F9 = {
+			isa = PBXGroup;
+			children = (
+				D58683CFD574658150FC55C5 /* MeetingRecorder */,
+				4256E1297D09C85C398306F8 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		FDBCD29659553EDC96568A8A /* Services */ = {
+			isa = PBXGroup;
+			children = (
+				E64E0A49DF24109418378E1E /* AudioRecordingService.swift */,
+				654EF10AF83A4F156C18AE99 /* MeetingDetectorService.swift */,
+				EA8343DE953D617BA53C8BD6 /* StorageService.swift */,
+				E5EF5A54C136850D736929DD /* TranscriptionService.swift */,
+			);
+			path = Services;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		93037C6606DB7A7975C52A72 /* MeetingRecorder */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 9C4F405A057A524AB719C7ED /* Build configuration list for PBXNativeTarget "MeetingRecorder" */;
+			buildPhases = (
+				03BDE06BC707D7361EBFD6DB /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = MeetingRecorder;
+			packageProductDependencies = (
+			);
+			productName = MeetingRecorder;
+			productReference = CC5A5E7D89DE1ADF1AF506A9 /* Meeting Recorder.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		4F0F1ED080CAC680BD7BB5BE /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 2630;
+				TargetAttributes = {
+					93037C6606DB7A7975C52A72 = {
+						DevelopmentTeam = "";
+						ProvisioningStyle = Manual;
+					};
+				};
+			};
+			buildConfigurationList = 7347C05C08B06A94277B6BDF /* Build configuration list for PBXProject "MeetingRecorder" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				en,
+			);
+			mainGroup = FBECA5B86895E43DAE3A93F9;
+			minimizedProjectReferenceProxies = 1;
+			preferredProjectObjectVersion = 77;
+			productRefGroup = 4256E1297D09C85C398306F8 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				93037C6606DB7A7975C52A72 /* MeetingRecorder */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXSourcesBuildPhase section */
+		03BDE06BC707D7361EBFD6DB /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				F50B3FBF4DEE6981C82050AD /* AppState.swift in Sources */,
+				6DC072205E793F017D639AD0 /* AudioRecordingService.swift in Sources */,
+				0D922445948060BBF19A0B16 /* MainWindowView.swift in Sources */,
+				7D314BFFB6E5AE13DE8682CB /* MeetingDetailView.swift in Sources */,
+				84547E2E51C52AB51B5B09AE /* MeetingDetectorService.swift in Sources */,
+				75F2EF869436BB03E03AE1F4 /* MeetingRecorderApp.swift in Sources */,
+				1892ECA23D0C29DFD2137832 /* MenuBarView.swift in Sources */,
+				8787746C49E21941D3915CF3 /* Models.swift in Sources */,
+				7F3954410637896A2F763C31 /* NotificationHelper.swift in Sources */,
+				1DBE1659C07FBE48F956BF2E /* SettingsView.swift in Sources */,
+				697AE6CA01C44898FDAFF44C /* StorageService.swift in Sources */,
+				5847C72B63E20035DD2F6E19 /* TranscriptionService.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		09D8B020F7BEF72E55822E74 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_STYLE = Manual;
+				COPY_PHASE_STRIP = NO;
+				DEAD_CODE_STRIPPING = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = "";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.9;
+			};
+			name = Release;
+		};
+		647E4215531FC385806E9629 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = MeetingRecorder/Resources/MeetingRecorder.entitlements;
+				COMBINE_HIDPI_IMAGES = YES;
+				DEAD_CODE_STRIPPING = YES;
+				ENABLE_HARDENED_RUNTIME = NO;
+				INFOPLIST_FILE = MeetingRecorder/Resources/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "@executable_path/../Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = com.meetingrecorder.app;
+				PRODUCT_NAME = "Meeting Recorder";
+				SDKROOT = macosx;
+			};
+			name = Release;
+		};
+		CC0B8812141DCB110B81F7A6 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = MeetingRecorder/Resources/MeetingRecorder.entitlements;
+				COMBINE_HIDPI_IMAGES = YES;
+				DEAD_CODE_STRIPPING = YES;
+				ENABLE_HARDENED_RUNTIME = NO;
+				INFOPLIST_FILE = MeetingRecorder/Resources/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "@executable_path/../Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = com.meetingrecorder.app;
+				PRODUCT_NAME = "Meeting Recorder";
+				SDKROOT = macosx;
+			};
+			name = Debug;
+		};
+		CEDC12DC98F83BC8FDB383C1 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_STYLE = Manual;
+				COPY_PHASE_STRIP = NO;
+				DEAD_CODE_STRIPPING = YES;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = "";
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"DEBUG=1",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.9;
+			};
+			name = Debug;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		7347C05C08B06A94277B6BDF /* Build configuration list for PBXProject "MeetingRecorder" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				CEDC12DC98F83BC8FDB383C1 /* Debug */,
+				09D8B020F7BEF72E55822E74 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		9C4F405A057A524AB719C7ED /* Build configuration list for PBXNativeTarget "MeetingRecorder" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				CC0B8812141DCB110B81F7A6 /* Debug */,
+				647E4215531FC385806E9629 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 4F0F1ED080CAC680BD7BB5BE /* Project object */;
+}
