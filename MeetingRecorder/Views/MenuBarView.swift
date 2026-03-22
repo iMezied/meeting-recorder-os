@@ -82,6 +82,18 @@ struct MenuBarView: View {
                     Text("Settings...")
                         .font(.caption)
                 }
+                .onHover { _ in }
+                .simultaneousGesture(TapGesture().onEnded {
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                        NSApplication.shared.activate(ignoringOtherApps: true)
+                        for window in NSApplication.shared.windows {
+                            if window.title.contains("Settings") || window.title.contains("Preferences") {
+                                window.makeKeyAndOrderFront(nil)
+                                window.orderFrontRegardless()
+                            }
+                        }
+                    }
+                })
 
                 Spacer()
 

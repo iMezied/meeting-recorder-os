@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		A1B2C3D4E5F60718A9B0C1D2 /* AIService.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4E5F6071829A0B1C2D3E4F5 /* AIService.swift */; };
 		0D922445948060BBF19A0B16 /* MainWindowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A00231144F425F2CA0B756E0 /* MainWindowView.swift */; };
 		1892ECA23D0C29DFD2137832 /* MenuBarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 321E7D150243EAC143D1131C /* MenuBarView.swift */; };
 		1DBE1659C07FBE48F956BF2E /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 943657212B7726FDBF0BA8EE /* SettingsView.swift */; };
@@ -22,6 +23,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		D4E5F6071829A0B1C2D3E4F5 /* AIService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIService.swift; sourceTree = "<group>"; };
 		1CE0B053F636C8564079FA27 /* MeetingRecorder.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = MeetingRecorder.entitlements; sourceTree = "<group>"; };
 		2D42CF914F5DE82DFF54A34E /* MeetingRecorderApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MeetingRecorderApp.swift; sourceTree = "<group>"; };
 		321E7D150243EAC143D1131C /* MenuBarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuBarView.swift; sourceTree = "<group>"; };
@@ -123,6 +125,7 @@
 		FDBCD29659553EDC96568A8A /* Services */ = {
 			isa = PBXGroup;
 			children = (
+				D4E5F6071829A0B1C2D3E4F5 /* AIService.swift */,
 				E64E0A49DF24109418378E1E /* AudioRecordingService.swift */,
 				654EF10AF83A4F156C18AE99 /* MeetingDetectorService.swift */,
 				EA8343DE953D617BA53C8BD6 /* StorageService.swift */,
@@ -190,6 +193,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A1B2C3D4E5F60718A9B0C1D2 /* AIService.swift in Sources */,
 				F50B3FBF4DEE6981C82050AD /* AppState.swift in Sources */,
 				6DC072205E793F017D639AD0 /* AudioRecordingService.swift in Sources */,
 				0D922445948060BBF19A0B16 /* MainWindowView.swift in Sources */,

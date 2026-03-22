@@ -14,6 +14,8 @@ final class AppState: ObservableObject {
     // MARK: - Processing State
     @Published var isTranscribing = false
     @Published var transcriptionProgress: Double = 0.0
+    @Published var isSummarizing = false
+    @Published var isAnalyzingSentiment = false
 
     // MARK: - Data
     @Published var meetings: [Meeting] = []
@@ -24,6 +26,7 @@ final class AppState: ObservableObject {
     let meetingDetector = MeetingDetectorService()
     let transcriptionService = TranscriptionService()
     let storageService = StorageService()
+    let aiService = AIService()
 
     // MARK: - Settings
     @AppStorage("whisperModelSize") var whisperModelSize = "base"
@@ -31,6 +34,7 @@ final class AppState: ObservableObject {
     @AppStorage("autoTranscribe") var autoTranscribe = true
     @AppStorage("selectedLanguage") var selectedLanguage = "auto"
     @AppStorage("audioInputDevice") var audioInputDevice = "default"
+    @AppStorage("ollamaModel") var ollamaModel = "llama3.2"
 
     private var durationTimer: Timer?
 
@@ -115,13 +119,14 @@ final class AppState: ObservableObject {
 
     // MARK: - Transcription
 
-    func transcribe(meeting: Meeting) async {
+    func transcribe(meeting: Meeting, modelSize: String? = nil) async {
         guard !isTranscribing else { return }
         isTranscribing = true
         transcriptionProgress = 0
+        let model = modelSize ?? whisperModelSize
         do {
             let transcript = try await transcriptionService.transcribe(
-                audioPath: meeting.audioPath, language: selectedLanguage, modelSize: whisperModelSize
+                audioPath: meeting.audioPath, language: selectedLanguage, modelSize: model
             ) { [weak self] progress in
                 Task { @MainActor in self?.transcriptionProgress = progress }
             }
@@ -144,6 +149,74 @@ final class AppState: ObservableObject {
         }
         isTranscribing = false
         transcriptionProgress = 0
+    }
+
+    // MARK: - AI Analysis
+
+    func summarize(meeting: Meeting) async {
+        guard !isSummarizing, let transcriptPath = meeting.transcriptPath,
+              let transcript = storageService.loadTranscript(from: transcriptPath) else { return }
+
+        isSummarizing = true
+        do {
+            let running = await aiService.isOllamaRunning()
+            guard running else { throw AIServiceError.ollamaNotRunning }
+
+            let summary = try await aiService.summarize(transcript: transcript, model: ollamaModel)
+            let summaryURL = meeting.directoryURL.appendingPathComponent("summary.json")
+            try storageService.saveSummary(summary, to: summaryURL)
+
+            if let index = meetings.firstIndex(where: { $0.id == meeting.id }) {
+                meetings[index].summaryPath = summaryURL.path
+                meetings[index].status = .summarized
+                storageService.saveMeeting(meetings[index])
+            }
+            NotificationHelper.send(title: "Summary Ready", body: "\(meeting.source.displayName) meeting summarized")
+        } catch {
+            print("[AI] Summarization failed: \(error)")
+            NotificationHelper.send(title: "Summary Failed", body: error.localizedDescription)
+        }
+        isSummarizing = false
+    }
+
+    func analyzeSentiment(meeting: Meeting) async {
+        guard !isAnalyzingSentiment, let transcriptPath = meeting.transcriptPath,
+              let transcript = storageService.loadTranscript(from: transcriptPath) else { return }
+
+        isAnalyzingSentiment = true
+        do {
+            let running = await aiService.isOllamaRunning()
+            guard running else { throw AIServiceError.ollamaNotRunning }
+
+            let sentiment = try await aiService.analyzeSentiment(transcript: transcript, model: ollamaModel)
+            let sentimentURL = meeting.directoryURL.appendingPathComponent("sentiment.json")
+            try storageService.saveSentiment(sentiment, to: sentimentURL)
+
+            if let index = meetings.firstIndex(where: { $0.id == meeting.id }) {
+                meetings[index].sentimentPath = sentimentURL.path
+                storageService.saveMeeting(meetings[index])
+            }
+            NotificationHelper.send(title: "Analysis Ready", body: "\(meeting.source.displayName) meeting analyzed")
+        } catch {
+            print("[AI] Sentiment analysis failed: \(error)")
+            NotificationHelper.send(title: "Analysis Failed", body: error.localizedDescription)
+        }
+        isAnalyzingSentiment = false
+    }
+
+    // MARK: - Notes
+
+    func saveNotes(meeting: Meeting, notes: String) {
+        let notesURL = meeting.directoryURL.appendingPathComponent("notes.txt")
+        do {
+            try storageService.saveNotes(notes, to: notesURL)
+            if let index = meetings.firstIndex(where: { $0.id == meeting.id }) {
+                meetings[index].notesPath = notesURL.path
+                storageService.saveMeeting(meetings[index])
+            }
+        } catch {
+            print("[Notes] Failed to save notes: \(error)")
+        }
     }
 
     func deleteMeeting(_ meeting: Meeting) {

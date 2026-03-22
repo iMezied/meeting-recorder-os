@@ -118,6 +118,63 @@ final class StorageService {
         }
     }
 
+    // MARK: - Summary & Sentiment
+
+    func saveSummary(_ summary: MeetingSummary, to url: URL) throws {
+        let encoder = JSONEncoder()
+        encoder.dateEncodingStrategy = .iso8601
+        encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
+        let data = try encoder.encode(summary)
+        try data.write(to: url, options: .atomic)
+    }
+
+    func loadSummary(from path: String) -> MeetingSummary? {
+        let url = URL(fileURLWithPath: path)
+        guard FileManager.default.fileExists(atPath: path) else { return nil }
+        do {
+            let data = try Data(contentsOf: url)
+            let decoder = JSONDecoder()
+            decoder.dateDecodingStrategy = .iso8601
+            return try decoder.decode(MeetingSummary.self, from: data)
+        } catch {
+            print("[Storage] Failed to load summary: \(error)")
+            return nil
+        }
+    }
+
+    func saveSentiment(_ sentiment: MeetingSentiment, to url: URL) throws {
+        let encoder = JSONEncoder()
+        encoder.dateEncodingStrategy = .iso8601
+        encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
+        let data = try encoder.encode(sentiment)
+        try data.write(to: url, options: .atomic)
+    }
+
+    func loadSentiment(from path: String) -> MeetingSentiment? {
+        let url = URL(fileURLWithPath: path)
+        guard FileManager.default.fileExists(atPath: path) else { return nil }
+        do {
+            let data = try Data(contentsOf: url)
+            let decoder = JSONDecoder()
+            decoder.dateDecodingStrategy = .iso8601
+            return try decoder.decode(MeetingSentiment.self, from: data)
+        } catch {
+            print("[Storage] Failed to load sentiment: \(error)")
+            return nil
+        }
+    }
+
+    // MARK: - Notes
+
+    func saveNotes(_ notes: String, to url: URL) throws {
+        try notes.write(to: url, atomically: true, encoding: .utf8)
+    }
+
+    func loadNotes(from path: String) -> String? {
+        guard FileManager.default.fileExists(atPath: path) else { return nil }
+        return try? String(contentsOf: URL(fileURLWithPath: path), encoding: .utf8)
+    }
+
     // MARK: - Disk Usage
 
     func totalStorageUsed() -> Int64 {

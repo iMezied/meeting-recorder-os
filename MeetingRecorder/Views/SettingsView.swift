@@ -117,8 +117,9 @@ struct SettingsView: View {
                     ForEach(availableModels, id: \.self) { model in
                         Text(model).tag(model)
                     }
-                    if availableModels.isEmpty {
-                        Text("No models downloaded").tag("base")
+                    // Ensure the current selection always has a matching tag
+                    if !availableModels.contains(appState.whisperModelSize) {
+                        Text("\(appState.whisperModelSize) (not downloaded)").tag(appState.whisperModelSize)
                     }
                 }
                 Text("Download models in the Models tab.")

@@ -223,15 +223,45 @@ final class TranscriptionService {
 
         let output = try JSONDecoder().decode(WhisperOutput.self, from: data)
 
-        let segments = (output.transcription ?? []).enumerated().map { index, seg in
-            TranscriptSegment(
+        // Parse segments and assign speaker labels based on time gaps and turn markers
+        var currentSpeaker = 1
+        var speakerCount = 1
+        var segments: [TranscriptSegment] = []
+        var previousEndTime: Double = 0
+
+        for (index, seg) in (output.transcription ?? []).enumerated() {
+            let rawText = seg.text.trimmingCharacters(in: .whitespaces)
+
+            // Check for [SPEAKER_TURN] marker (if present from whisper)
+            if rawText.contains("[SPEAKER_TURN]") {
+                speakerCount += 1
+                currentSpeaker = speakerCount
+            }
+
+            let cleanText = rawText
+                .replacingOccurrences(of: "[SPEAKER_TURN]", with: "")
+                .trimmingCharacters(in: .whitespaces)
+
+            guard !cleanText.isEmpty else { continue }
+
+            let startTime = parseTimestamp(seg.timestamps.from)
+            let endTime = parseTimestamp(seg.timestamps.to)
+
+            // Detect speaker change based on significant pause (>1.5s gap between segments)
+            if index > 0 && (startTime - previousEndTime) > 1.5 {
+                speakerCount += 1
+                currentSpeaker = speakerCount
+            }
+            previousEndTime = endTime
+
+            segments.append(TranscriptSegment(
                 index: index,
-                startTime: parseTimestamp(seg.timestamps.from),
-                endTime: parseTimestamp(seg.timestamps.to),
-                text: seg.text.trimmingCharacters(in: .whitespaces),
+                startTime: startTime,
+                endTime: endTime,
+                text: cleanText,
                 language: output.result?.language,
-                speaker: nil
-            )
+                speaker: "Speaker \(currentSpeaker)"
+            ))
         }
 
         // Clean up whisper's output JSON (we save our own format)
@@ -251,21 +281,43 @@ final class TranscriptionService {
         let lines = output.components(separatedBy: .newlines)
 
         var segments: [TranscriptSegment] = []
+        var currentSpeaker = 1
+        var speakerCount = 1
+        var previousEndTime: Double = 0
 
         for (index, line) in lines.enumerated() {
             let range = NSRange(line.startIndex..., in: line)
             if let match = regex?.firstMatch(in: line, range: range) {
                 let start = String(line[Range(match.range(at: 1), in: line)!])
                 let end = String(line[Range(match.range(at: 2), in: line)!])
-                let text = String(line[Range(match.range(at: 3), in: line)!])
+                var text = String(line[Range(match.range(at: 3), in: line)!])
+
+                if text.contains("[SPEAKER_TURN]") {
+                    speakerCount += 1
+                    currentSpeaker = speakerCount
+                    text = text.replacingOccurrences(of: "[SPEAKER_TURN]", with: "")
+                }
+
+                let cleanText = text.trimmingCharacters(in: .whitespaces)
+                guard !cleanText.isEmpty else { continue }
+
+                let startTime = parseTimestamp(start)
+                let endTime = parseTimestamp(end)
+
+                // Detect speaker change based on significant pause
+                if !segments.isEmpty && (startTime - previousEndTime) > 1.5 {
+                    speakerCount += 1
+                    currentSpeaker = speakerCount
+                }
+                previousEndTime = endTime
 
                 segments.append(TranscriptSegment(
                     index: index,
-                    startTime: parseTimestamp(start),
-                    endTime: parseTimestamp(end),
-                    text: text.trimmingCharacters(in: .whitespaces),
+                    startTime: startTime,
+                    endTime: endTime,
+                    text: cleanText,
                     language: nil,
-                    speaker: nil
+                    speaker: "Speaker \(currentSpeaker)"
                 ))
             }
         }

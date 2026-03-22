@@ -4,11 +4,21 @@ struct MeetingDetailView: View {
     let meeting: Meeting
     @EnvironmentObject var appState: AppState
     @State private var transcript: Transcript?
+    @State private var summary: MeetingSummary?
+    @State private var sentiment: MeetingSentiment?
+    @State private var notesText: String = ""
     @State private var selectedTab: DetailTab = .transcript
     @State private var searchText = ""
+    @State private var selectedModel: String = ""
+    @State private var availableModels: [String] = []
+    @State private var notesSaveTimer: Timer?
+    @State private var notesUnsaved = false
 
     enum DetailTab: String, CaseIterable {
         case transcript = "Transcript"
+        case summary = "Summary"
+        case sentiment = "Sentiment"
+        case notes = "Notes"
         case info = "Info"
     }
 
@@ -21,11 +31,24 @@ struct MeetingDetailView: View {
 
             switch selectedTab {
             case .transcript: transcriptView
+            case .summary: summaryView
+            case .sentiment: sentimentView
             case .info: infoView
             }
         }
-        .onAppear { loadTranscript() }
-        .onChange(of: meeting.id) { loadTranscript() }
+        .onAppear {
+            loadData()
+            availableModels = appState.transcriptionService.availableModels()
+            selectedModel = appState.whisperModelSize
+        }
+        .onChange(of: meeting.id) {
+            loadData()
+            selectedModel = appState.whisperModelSize
+        }
+        .onChange(of: meeting.transcriptPath) { loadData() }
+        .onChange(of: meeting.summaryPath) { loadData() }
+        .onChange(of: meeting.sentimentPath) { loadData() }
+        .onChange(of: meeting.status) { loadData() }
     }
 
     // MARK: - Header
@@ -52,10 +75,29 @@ struct MeetingDetailView: View {
 
             Spacer()
 
-            HStack(spacing: 6) {
-                if meeting.status == .recorded {
-                    Button(action: { Task { await appState.transcribe(meeting: meeting) } }) {
-                        Label("Transcribe", systemImage: "text.badge.plus")
+            HStack(spacing: 8) {
+                // Model picker
+                if !availableModels.isEmpty {
+                    Picker("", selection: $selectedModel) {
+                        ForEach(availableModels, id: \.self) { model in
+                            Text(model).tag(model)
+                        }
+                    }
+                    .frame(width: 100)
+                    .controlSize(.small)
+                }
+
+                // Transcribe / Re-transcribe button
+                if !appState.isTranscribing {
+                    Button(action: {
+                        Task {
+                            await appState.transcribe(meeting: meeting, modelSize: selectedModel)
+                        }
+                    }) {
+                        Label(
+                            transcript != nil ? "Re-transcribe" : "Transcribe",
+                            systemImage: "text.badge.plus"
+                        )
                     }
                     .buttonStyle(.borderedProminent)
                     .controlSize(.small)
@@ -135,16 +177,23 @@ struct MeetingDetailView: View {
                 ScrollView {
                     LazyVStack(alignment: .leading, spacing: 0) {
                         ForEach(filteredSegments) { segment in
-                            HStack(alignment: .top, spacing: 14) {
+                            HStack(alignment: .top, spacing: 10) {
                                 Text(formatTimestamp(segment.startTime))
                                     .font(.system(.caption, design: .monospaced))
                                     .foregroundStyle(.secondary.opacity(0.6))
                                     .frame(width: 42, alignment: .trailing)
 
-                                Text(highlightText(segment.text))
-                                    .font(.callout)
-                                    .lineSpacing(5)
-                                    .textSelection(.enabled)
+                                VStack(alignment: .leading, spacing: 3) {
+                                    if let speaker = segment.speaker {
+                                        Text(speaker)
+                                            .font(.caption.weight(.semibold))
+                                            .foregroundStyle(speakerColor(speaker))
+                                    }
+                                    Text(highlightText(segment.text))
+                                        .font(.callout)
+                                        .lineSpacing(5)
+                                        .textSelection(.enabled)
+                                }
                             }
                             .padding(.vertical, 8)
                             .padding(.horizontal, 20)
@@ -155,13 +204,29 @@ struct MeetingDetailView: View {
                     .padding(.bottom, 20)
                 }
             }
-        } else if meeting.status == .recorded {
+        } else if transcript != nil && transcript!.segments.isEmpty {
+            // Transcript exists but produced no segments — offer re-transcription
+            VStack(spacing: 16) {
+                Image(systemName: "arrow.clockwise.circle")
+                    .font(.system(size: 44)).foregroundStyle(.orange.opacity(0.6))
+                Text("Transcript is empty").font(.headline).foregroundStyle(.secondary)
+                Text("Try a different model for better results.")
+                    .font(.caption).foregroundStyle(.secondary)
+                Button("Re-transcribe") {
+                    Task { await appState.transcribe(meeting: meeting, modelSize: selectedModel) }
+                }
+                .buttonStyle(.borderedProminent)
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+        } else if meeting.status == .recorded || transcript == nil {
             VStack(spacing: 16) {
                 Image(systemName: "text.badge.plus")
                     .font(.system(size: 44)).foregroundStyle(.secondary.opacity(0.4))
                 Text("No transcript yet").font(.headline).foregroundStyle(.secondary)
-                Button("Transcribe Now") { Task { await appState.transcribe(meeting: meeting) } }
-                    .buttonStyle(.borderedProminent)
+                Button("Transcribe Now") {
+                    Task { await appState.transcribe(meeting: meeting, modelSize: selectedModel) }
+                }
+                .buttonStyle(.borderedProminent)
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
         } else {
@@ -169,6 +234,173 @@ struct MeetingDetailView: View {
                 Image(systemName: "exclamationmark.triangle")
                     .font(.system(size: 44)).foregroundStyle(.secondary.opacity(0.4))
                 Text("Transcript unavailable").foregroundStyle(.secondary)
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+        }
+    }
+
+    // MARK: - Summary View
+
+    @ViewBuilder
+    private var summaryView: some View {
+        if appState.isSummarizing {
+            VStack(spacing: 16) {
+                ProgressView().controlSize(.large)
+                Text("Generating summary...").font(.subheadline).foregroundStyle(.secondary)
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+        } else if let summary {
+            ScrollView {
+                VStack(alignment: .leading, spacing: 20) {
+                    // Summary
+                    InfoSection(title: "Summary") {
+                        Text(summary.summary)
+                            .font(.callout).lineSpacing(4).textSelection(.enabled)
+                    }
+
+                    // Key Points
+                    if !summary.keyPoints.isEmpty {
+                        InfoSection(title: "Key Points") {
+                            ForEach(summary.keyPoints, id: \.self) { point in
+                                HStack(alignment: .top, spacing: 8) {
+                                    Circle().fill(Color.blue).frame(width: 6, height: 6).padding(.top, 6)
+                                    Text(point).font(.callout).textSelection(.enabled)
+                                }
+                            }
+                        }
+                    }
+
+                    // Action Items
+                    if !summary.actionItems.isEmpty {
+                        InfoSection(title: "Action Items") {
+                            ForEach(summary.actionItems) { item in
+                                HStack(alignment: .top, spacing: 8) {
+                                    Image(systemName: "checklist").foregroundStyle(.orange).font(.caption)
+                                    VStack(alignment: .leading, spacing: 2) {
+                                        Text(item.description).font(.callout).textSelection(.enabled)
+                                        if let assignee = item.assignee {
+                                            Text("Assigned to: \(assignee)")
+                                                .font(.caption).foregroundStyle(.secondary)
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    // Decisions
+                    if !summary.decisions.isEmpty {
+                        InfoSection(title: "Decisions") {
+                            ForEach(summary.decisions, id: \.self) { decision in
+                                HStack(alignment: .top, spacing: 8) {
+                                    Image(systemName: "checkmark.seal.fill").foregroundStyle(.green).font(.caption)
+                                    Text(decision).font(.callout).textSelection(.enabled)
+                                }
+                            }
+                        }
+                    }
+                }
+                .padding(20)
+            }
+        } else if transcript != nil {
+            VStack(spacing: 16) {
+                Image(systemName: "text.badge.star")
+                    .font(.system(size: 44)).foregroundStyle(.secondary.opacity(0.4))
+                Text("No summary yet").font(.headline).foregroundStyle(.secondary)
+                Text("Requires Ollama running locally with a language model.")
+                    .font(.caption).foregroundStyle(.secondary)
+                Button("Generate Summary") { Task { await appState.summarize(meeting: meeting) } }
+                    .buttonStyle(.borderedProminent)
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+        } else {
+            VStack(spacing: 12) {
+                Image(systemName: "text.badge.star")
+                    .font(.system(size: 44)).foregroundStyle(.secondary.opacity(0.4))
+                Text("Transcribe the meeting first").foregroundStyle(.secondary)
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+        }
+    }
+
+    // MARK: - Sentiment View
+
+    @ViewBuilder
+    private var sentimentView: some View {
+        if appState.isAnalyzingSentiment {
+            VStack(spacing: 16) {
+                ProgressView().controlSize(.large)
+                Text("Analyzing sentiment...").font(.subheadline).foregroundStyle(.secondary)
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+        } else if let sentiment {
+            ScrollView {
+                VStack(alignment: .leading, spacing: 20) {
+                    // Overall Tone
+                    InfoSection(title: "Overall Tone") {
+                        Text(sentiment.overallTone)
+                            .font(.callout).lineSpacing(4).textSelection(.enabled)
+                    }
+
+                    // Speaker Analysis
+                    if !sentiment.speakers.isEmpty {
+                        InfoSection(title: "Speaker Analysis") {
+                            ForEach(sentiment.speakers) { speaker in
+                                VStack(alignment: .leading, spacing: 6) {
+                                    Text(speaker.speaker)
+                                        .font(.subheadline.weight(.semibold))
+                                        .foregroundStyle(speakerColor(speaker.speaker))
+                                    HStack(spacing: 16) {
+                                        Label(speaker.sentiment.capitalized, systemImage: sentimentIcon(speaker.sentiment))
+                                            .font(.caption)
+                                            .foregroundStyle(sentimentColor(speaker.sentiment))
+                                        Label(speaker.engagement.capitalized, systemImage: "chart.bar.fill")
+                                            .font(.caption)
+                                            .foregroundStyle(.secondary)
+                                    }
+                                    if !speaker.style.isEmpty {
+                                        Text(speaker.style)
+                                            .font(.caption).foregroundStyle(.secondary)
+                                    }
+                                }
+                                .padding(.vertical, 4)
+                                if speaker.id != sentiment.speakers.last?.id {
+                                    Divider()
+                                }
+                            }
+                        }
+                    }
+
+                    // Group Dynamics
+                    if !sentiment.dynamics.isEmpty {
+                        InfoSection(title: "Group Dynamics") {
+                            ForEach(sentiment.dynamics, id: \.self) { observation in
+                                HStack(alignment: .top, spacing: 8) {
+                                    Circle().fill(Color.purple).frame(width: 6, height: 6).padding(.top, 6)
+                                    Text(observation).font(.callout).textSelection(.enabled)
+                                }
+                            }
+                        }
+                    }
+                }
+                .padding(20)
+            }
+        } else if transcript != nil {
+            VStack(spacing: 16) {
+                Image(systemName: "person.3.sequence")
+                    .font(.system(size: 44)).foregroundStyle(.secondary.opacity(0.4))
+                Text("No sentiment analysis yet").font(.headline).foregroundStyle(.secondary)
+                Text("Requires Ollama running locally with a language model.")
+                    .font(.caption).foregroundStyle(.secondary)
+                Button("Analyze Sentiment") { Task { await appState.analyzeSentiment(meeting: meeting) } }
+                    .buttonStyle(.borderedProminent)
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+        } else {
+            VStack(spacing: 12) {
+                Image(systemName: "person.3.sequence")
+                    .font(.system(size: 44)).foregroundStyle(.secondary.opacity(0.4))
+                Text("Transcribe the meeting first").foregroundStyle(.secondary)
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
@@ -210,9 +442,46 @@ struct MeetingDetailView: View {
         return transcript.segments.filter { $0.text.localizedCaseInsensitiveContains(searchText) }
     }
 
-    private func loadTranscript() {
-        guard let path = meeting.transcriptPath else { transcript = nil; return }
-        transcript = appState.storageService.loadTranscript(from: path)
+    private func loadData() {
+        if let path = meeting.transcriptPath {
+            transcript = appState.storageService.loadTranscript(from: path)
+        } else { transcript = nil }
+
+        if let path = meeting.summaryPath {
+            summary = appState.storageService.loadSummary(from: path)
+        } else { summary = nil }
+
+        if let path = meeting.sentimentPath {
+            sentiment = appState.storageService.loadSentiment(from: path)
+        } else { sentiment = nil }
+    }
+
+    private let speakerColors: [Color] = [.blue, .orange, .green, .purple, .pink, .cyan, .brown, .mint]
+
+    private func speakerColor(_ speaker: String) -> Color {
+        // Extract number from "Speaker N" or hash the name
+        if let numStr = speaker.split(separator: " ").last, let num = Int(numStr) {
+            return speakerColors[(num - 1) % speakerColors.count]
+        }
+        return speakerColors[abs(speaker.hashValue) % speakerColors.count]
+    }
+
+    private func sentimentIcon(_ sentiment: String) -> String {
+        switch sentiment.lowercased() {
+        case "positive": return "face.smiling"
+        case "negative": return "face.dashed"
+        case "mixed": return "face.smiling.inverse"
+        default: return "minus.circle"
+        }
+    }
+
+    private func sentimentColor(_ sentiment: String) -> Color {
+        switch sentiment.lowercased() {
+        case "positive": return .green
+        case "negative": return .red
+        case "mixed": return .orange
+        default: return .secondary
+        }
     }
 
     private func highlightText(_ text: String) -> AttributedString {

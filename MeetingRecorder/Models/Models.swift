@@ -10,6 +10,8 @@ struct Meeting: Identifiable, Codable, Hashable {
     let audioPath: String
     var transcriptPath: String?
     var summaryPath: String?
+    var sentimentPath: String?
+    var notesPath: String?
     var status: MeetingStatus
     var title: String?
 
@@ -126,6 +128,39 @@ struct TranscriptSegment: Codable, Identifiable {
     let text: String
     let language: String?
     let speaker: String?
+}
+
+// MARK: - Meeting Summary
+
+struct MeetingSummary: Codable {
+    let summary: String
+    let keyPoints: [String]
+    let actionItems: [ActionItem]
+    let decisions: [String]
+    let generatedAt: Date
+}
+
+struct ActionItem: Codable, Identifiable {
+    var id: String { description }
+    let description: String
+    let assignee: String?
+}
+
+// MARK: - Meeting Sentiment
+
+struct MeetingSentiment: Codable {
+    let overallTone: String
+    let speakers: [SpeakerSentiment]
+    let dynamics: [String]
+    let generatedAt: Date
+}
+
+struct SpeakerSentiment: Codable, Identifiable {
+    var id: String { speaker }
+    let speaker: String
+    let style: String
+    let sentiment: String
+    let engagement: String
 }
 
 // MARK: - Audio Device
