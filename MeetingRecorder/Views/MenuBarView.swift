@@ -78,14 +78,10 @@ struct MenuBarView: View {
 
             // Footer
             HStack {
-                Button("Settings...") {
-                    // Dismiss the menu bar popover first, then open settings
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                        AppDelegate.openSettings()
-                    }
+                SettingsLink {
+                    Text("Settings...")
+                        .font(.caption)
                 }
-                .buttonStyle(.plain)
-                .font(.caption)
 
                 Spacer()
 

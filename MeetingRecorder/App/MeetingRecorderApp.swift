@@ -30,16 +30,21 @@ struct MeetingRecorderApp: App {
 // MARK: - AppDelegate manages the library window via NSWindow
 @MainActor
 class AppDelegate: NSObject, NSApplicationDelegate {
+    private static weak var _shared: AppDelegate?
     private var libraryWindow: NSWindow?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
+        AppDelegate._shared = self
         Task { @MainActor in
             AppState.shared.meetingDetector.startMonitoring()
         }
     }
 
     static var shared: AppDelegate {
-        NSApplication.shared.delegate as! AppDelegate
+        guard let instance = _shared else {
+            fatalError("AppDelegate accessed before applicationDidFinishLaunching")
+        }
+        return instance
     }
 
     func openLibraryWindow() {
@@ -73,8 +78,4 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         AppDelegate.shared.openLibraryWindow()
     }
 
-    static func openSettings() {
-        NSApplication.shared.activate(ignoringOtherApps: true)
-        NSApp.sendAction(Selector(("showSettingsWindow:")), to: nil, from: nil)
-    }
 }
