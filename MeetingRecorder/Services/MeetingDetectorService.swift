@@ -30,14 +30,14 @@ final class MeetingDetectorService: ObservableObject {
             self?.checkForMeetings()
         }
         checkForMeetings()
-        print("[MeetingDetector] Monitoring started")
+        AppLogger.info("Monitoring started (polling every \(pollInterval)s)", category: .detector)
     }
 
     func stopMonitoring() {
         pollTimer?.invalidate()
         pollTimer = nil
         isMonitoring = false
-        print("[MeetingDetector] Monitoring stopped")
+        AppLogger.info("Monitoring stopped", category: .detector)
     }
 
     // MARK: - Detection Logic
@@ -53,14 +53,14 @@ final class MeetingDetectorService: ObservableObject {
                     self.detectedMeeting = source
                     self.wasInMeeting = true
                     self.onMeetingDetected?(source)
-                    print("[MeetingDetector] Meeting detected: \(source.displayName)")
+                    AppLogger.info("Meeting detected: \(source.displayName)", category: .detector)
                 }
             } else {
                 if self.wasInMeeting {
                     self.detectedMeeting = nil
                     self.wasInMeeting = false
                     self.onMeetingEnded?()
-                    print("[MeetingDetector] Meeting ended")
+                    AppLogger.info("Meeting ended", category: .detector)
                 }
             }
         }

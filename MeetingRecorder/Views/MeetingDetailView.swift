@@ -11,7 +11,6 @@ struct MeetingDetailView: View {
     @State private var searchText = ""
     @State private var selectedModel: String = ""
     @State private var availableModels: [String] = []
-    @State private var notesSaveTimer: Timer?
     @State private var notesUnsaved = false
 
     enum DetailTab: String, CaseIterable {
@@ -425,16 +424,17 @@ struct MeetingDetailView: View {
                     .foregroundStyle(.secondary)
                 Spacer()
                 if notesUnsaved {
-                    Text("Unsaved")
+                    Text("Edited")
                         .font(.caption2)
                         .foregroundStyle(.orange)
+                        .padding(.trailing, 4)
                 }
-                Button(action: saveNotes) {
-                    Label("Save", systemImage: "square.and.arrow.down")
+                Button("Save") {
+                    saveNotes()
                 }
                 .controlSize(.small)
                 .buttonStyle(.borderedProminent)
-                .keyboardShortcut("s", modifiers: .command)
+                .disabled(!notesUnsaved)
             }
             .padding(.horizontal, 20)
             .padding(.vertical, 10)
@@ -442,33 +442,34 @@ struct MeetingDetailView: View {
             Divider()
 
             // Text editor
-            TextEditor(text: $notesText)
-                .font(.callout)
-                .lineSpacing(5)
-                .scrollContentBackground(.hidden)
-                .padding(.horizontal, 16)
-                .padding(.vertical, 10)
-                .onChange(of: notesText) {
-                    notesUnsaved = true
-                    scheduleAutoSave()
+            ZStack(alignment: .topLeading) {
+                if notesText.isEmpty {
+                    Text("Add your meeting notes here...")
+                        .font(.callout)
+                        .foregroundStyle(.secondary.opacity(0.5))
+                        .padding(.horizontal, 21)
+                        .padding(.vertical, 16)
+                        .allowsHitTesting(false)
                 }
+                TextEditor(text: $notesText)
+                    .font(.callout)
+                    .lineSpacing(5)
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 10)
+                    .onChange(of: notesText) {
+                        notesUnsaved = true
+                    }
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+        }
+        .onDisappear {
+            if notesUnsaved { saveNotes() }
         }
     }
 
     private func saveNotes() {
-        notesSaveTimer?.invalidate()
-        notesSaveTimer = nil
         appState.saveNotes(meeting: meeting, notes: notesText)
         notesUnsaved = false
-    }
-
-    private func scheduleAutoSave() {
-        notesSaveTimer?.invalidate()
-        notesSaveTimer = Timer.scheduledTimer(withTimeInterval: 3.0, repeats: false) { _ in
-            Task { @MainActor in
-                saveNotes()
-            }
-        }
     }
 
     // MARK: - Info View

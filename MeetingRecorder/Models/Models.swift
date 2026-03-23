@@ -156,7 +156,7 @@ struct MeetingSentiment: Codable {
 }
 
 struct SpeakerSentiment: Codable, Identifiable {
-    var id: String { speaker }
+    var id: String { "\(speaker)-\(style)-\(sentiment)" }
     let speaker: String
     let style: String
     let sentiment: String

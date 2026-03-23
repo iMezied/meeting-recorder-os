@@ -35,7 +35,7 @@ struct SettingsView: View {
                             if newValue { try SMAppService.mainApp.register() }
                             else { try SMAppService.mainApp.unregister() }
                         } catch {
-                            print("[Settings] Launch at login error: \(error)")
+                            AppLogger.error("Launch at login error: \(error)", category: .app)
                             launchAtLogin = !newValue
                         }
                     }
@@ -127,9 +127,13 @@ struct SettingsView: View {
             }
             Section("Language") {
                 Picker("Language", selection: $appState.selectedLanguage) {
-                    Text("Auto-detect").tag("auto")
+                    Text("Auto-detect (mixed language)").tag("auto")
                     Text("English").tag("en")
                     Text("Arabic").tag("ar")
+                }
+                if appState.selectedLanguage == "auto" {
+                    Text("Auto-detect includes a bilingual prompt for mixed Arabic/English meetings. Use a specific language if your meetings are single-language for better accuracy.")
+                        .font(.caption).foregroundStyle(.secondary)
                 }
             }
         }

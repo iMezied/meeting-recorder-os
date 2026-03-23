@@ -86,7 +86,7 @@ final class AppState: ObservableObject {
             startDurationTimer()
             NotificationHelper.send(title: "Recording Started", body: "Recording \(currentMeetingSource.displayName) meeting...")
         } catch {
-            print("Failed to start recording: \(error)")
+            AppLogger.error("Failed to start recording: \(error)", category: .audio)
             NotificationHelper.send(title: "Recording Failed", body: error.localizedDescription)
         }
     }
@@ -120,35 +120,71 @@ final class AppState: ObservableObject {
     // MARK: - Transcription
 
     func transcribe(meeting: Meeting, modelSize: String? = nil) async {
-        guard !isTranscribing else { return }
+        guard !isTranscribing else {
+            AppLogger.warning("Transcription skipped — already in progress", category: .transcription)
+            return
+        }
+
+        let model = modelSize ?? whisperModelSize
+        AppLogger.info("Starting transcription for meeting \(meeting.id) with model: \(model)", category: .transcription)
+        AppLogger.info("Audio file: \(meeting.audioPath)", category: .transcription)
+
+        // Verify audio file exists
+        guard FileManager.default.fileExists(atPath: meeting.audioPath) else {
+            AppLogger.error("Audio file not found: \(meeting.audioPath)", category: .transcription)
+            return
+        }
+
+        // Remove old whisper output JSON if it exists (force fresh transcription)
+        let whisperJSON = meeting.audioPath + ".json"
+        if FileManager.default.fileExists(atPath: whisperJSON) {
+            try? FileManager.default.removeItem(atPath: whisperJSON)
+            AppLogger.info("Removed stale whisper output: \(whisperJSON)", category: .transcription)
+        }
+
         isTranscribing = true
         transcriptionProgress = 0
-        let model = modelSize ?? whisperModelSize
+
+        // Update status to show transcribing
+        if let index = meetings.firstIndex(where: { $0.id == meeting.id }) {
+            meetings[index].status = .transcribing
+            storageService.saveMeeting(meetings[index])
+        }
+
+        defer {
+            isTranscribing = false
+            transcriptionProgress = 0
+            AppLogger.info("Transcription state reset (isTranscribing = false)", category: .transcription)
+        }
+
         do {
             let transcript = try await transcriptionService.transcribe(
                 audioPath: meeting.audioPath, language: selectedLanguage, modelSize: model
             ) { [weak self] progress in
                 Task { @MainActor in self?.transcriptionProgress = progress }
             }
+
+            AppLogger.info("Transcription complete: \(transcript.segments.count) segments, language: \(transcript.language)", category: .transcription)
+
             let transcriptPath = URL(fileURLWithPath: meeting.audioPath)
                 .deletingLastPathComponent().appendingPathComponent("transcript.json")
             try storageService.saveTranscript(transcript, to: transcriptPath)
+            AppLogger.info("Transcript saved to: \(transcriptPath.path)", category: .transcription)
 
             if let index = meetings.firstIndex(where: { $0.id == meeting.id }) {
                 meetings[index].transcriptPath = transcriptPath.path
                 meetings[index].status = .transcribed
                 storageService.saveMeeting(meetings[index])
             }
-            NotificationHelper.send(title: "Transcription Complete", body: "\(meeting.source.displayName) meeting transcribed")
+            NotificationHelper.send(title: "Transcription Complete", body: "\(transcript.segments.count) segments — \(meeting.source.displayName)")
         } catch {
-            print("Transcription failed: \(error)")
+            AppLogger.error("Transcription failed: \(error)", category: .transcription)
             if let index = meetings.firstIndex(where: { $0.id == meeting.id }) {
                 meetings[index].status = .failed(error.localizedDescription)
                 storageService.saveMeeting(meetings[index])
             }
+            NotificationHelper.send(title: "Transcription Failed", body: error.localizedDescription)
         }
-        isTranscribing = false
-        transcriptionProgress = 0
     }
 
     // MARK: - AI Analysis
@@ -173,7 +209,7 @@ final class AppState: ObservableObject {
             }
             NotificationHelper.send(title: "Summary Ready", body: "\(meeting.source.displayName) meeting summarized")
         } catch {
-            print("[AI] Summarization failed: \(error)")
+            AppLogger.error("Summarization failed: \(error)", category: .ai)
             NotificationHelper.send(title: "Summary Failed", body: error.localizedDescription)
         }
         isSummarizing = false
@@ -198,7 +234,7 @@ final class AppState: ObservableObject {
             }
             NotificationHelper.send(title: "Analysis Ready", body: "\(meeting.source.displayName) meeting analyzed")
         } catch {
-            print("[AI] Sentiment analysis failed: \(error)")
+            AppLogger.error("Sentiment analysis failed: \(error)", category: .ai)
             NotificationHelper.send(title: "Analysis Failed", body: error.localizedDescription)
         }
         isAnalyzingSentiment = false
@@ -215,7 +251,7 @@ final class AppState: ObservableObject {
                 storageService.saveMeeting(meetings[index])
             }
         } catch {
-            print("[Notes] Failed to save notes: \(error)")
+            AppLogger.error("Failed to save notes: \(error)", category: .notes)
         }
     }
 

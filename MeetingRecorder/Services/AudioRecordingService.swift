@@ -70,7 +70,7 @@ final class AudioRecordingService: NSObject, ObservableObject {
         do {
             audioRecorder = try AVAudioRecorder(url: url, settings: settings)
         } catch {
-            print("[AudioService] Failed to create recorder: \(error)")
+            AppLogger.error("Failed to create recorder: \(error)", category: .audio)
             throw RecordingError.failedToStart
         }
 
@@ -84,7 +84,7 @@ final class AudioRecordingService: NSObject, ObservableObject {
 
         currentOutputURL = url
         startLevelMonitoring()
-        print("[AudioService] Recording to: \(url.path)")
+        AppLogger.info("Recording to: \(url.path)", category: .audio)
     }
 
     func stopRecording() -> URL? {
@@ -94,7 +94,7 @@ final class AudioRecordingService: NSObject, ObservableObject {
         let url = currentOutputURL
         audioRecorder = nil
         currentOutputURL = nil
-        print("[AudioService] Recording stopped. File: \(url?.path ?? "nil")")
+        AppLogger.info("Recording stopped. File: \(url?.path ?? "nil")", category: .audio)
         return url
     }
 
@@ -123,10 +123,10 @@ final class AudioRecordingService: NSObject, ObservableObject {
 
 extension AudioRecordingService: AVAudioRecorderDelegate {
     func audioRecorderDidFinishRecording(_ recorder: AVAudioRecorder, successfully flag: Bool) {
-        if !flag { print("[AudioService] Recording finished with error") }
+        if !flag { AppLogger.error("Recording finished with error", category: .audio) }
     }
     func audioRecorderEncodeErrorDidOccur(_ recorder: AVAudioRecorder, error: Error?) {
-        print("[AudioService] Encoding error: \(error?.localizedDescription ?? "unknown")")
+        AppLogger.error("Encoding error: \(error?.localizedDescription ?? "unknown")", category: .audio)
     }
 }
 

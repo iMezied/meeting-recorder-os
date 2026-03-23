@@ -29,10 +29,12 @@ final class StorageService {
 
     func createMeetingDirectory(source: MeetingSource) -> URL {
         let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "en_US_POSIX")
         formatter.dateFormat = "yyyy-MM-dd"
         let dateStr = formatter.string(from: Date())
 
         let timeFormatter = DateFormatter()
+        timeFormatter.locale = Locale(identifier: "en_US_POSIX")
         timeFormatter.dateFormat = "HHmm"
         let timeStr = timeFormatter.string(from: Date())
 
@@ -74,7 +76,7 @@ final class StorageService {
             decoder.dateDecodingStrategy = .iso8601
             return try decoder.decode([Meeting].self, from: data)
         } catch {
-            print("[Storage] Failed to load meetings: \(error)")
+            AppLogger.error("Failed to load meetings: \(error)", category: .storage)
             return []
         }
     }
@@ -113,7 +115,7 @@ final class StorageService {
             decoder.dateDecodingStrategy = .iso8601
             return try decoder.decode(Transcript.self, from: data)
         } catch {
-            print("[Storage] Failed to load transcript: \(error)")
+            AppLogger.error("Failed to load transcript: \(error)", category: .storage)
             return nil
         }
     }
@@ -137,7 +139,7 @@ final class StorageService {
             decoder.dateDecodingStrategy = .iso8601
             return try decoder.decode(MeetingSummary.self, from: data)
         } catch {
-            print("[Storage] Failed to load summary: \(error)")
+            AppLogger.error("Failed to load summary: \(error)", category: .storage)
             return nil
         }
     }
@@ -159,7 +161,7 @@ final class StorageService {
             decoder.dateDecodingStrategy = .iso8601
             return try decoder.decode(MeetingSentiment.self, from: data)
         } catch {
-            print("[Storage] Failed to load sentiment: \(error)")
+            AppLogger.error("Failed to load sentiment: \(error)", category: .storage)
             return nil
         }
     }
@@ -210,7 +212,7 @@ final class StorageService {
             let data = try encoder.encode(meetings)
             try data.write(to: meetingsIndexFile, options: .atomic)
         } catch {
-            print("[Storage] Failed to save meetings index: \(error)")
+            AppLogger.error("Failed to save meetings index: \(error)", category: .storage)
         }
     }
 }

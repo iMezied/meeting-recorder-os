@@ -82,12 +82,19 @@ struct MenuBarView: View {
                     Text("Settings...")
                         .font(.caption)
                 }
-                .onHover { _ in }
+                .buttonStyle(.plain)
                 .simultaneousGesture(TapGesture().onEnded {
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                    // Bring the settings window to front after it opens
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
                         NSApplication.shared.activate(ignoringOtherApps: true)
                         for window in NSApplication.shared.windows {
-                            if window.title.contains("Settings") || window.title.contains("Preferences") {
+                            // SwiftUI Settings windows have an identifier containing "settings"
+                            let id = window.identifier?.rawValue ?? ""
+                            let title = window.title
+                            if id.localizedCaseInsensitiveContains("settings")
+                                || id.localizedCaseInsensitiveContains("preferences")
+                                || title.contains("Settings")
+                                || title.contains("Preferences") {
                                 window.makeKeyAndOrderFront(nil)
                                 window.orderFrontRegardless()
                             }
